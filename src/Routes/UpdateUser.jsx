@@ -34,17 +34,16 @@ const UpdateUser = (id) => {
     };
     console.log("userData:user", initialUserData);
     setIsFormChanged(
-      JSON.stringify(initialUserRef.current) !== JSON.stringify(initialUserData)
+      JSON.stringify(initialUserRef.current) !==
+        JSON.stringify(initialUserData),
     );
   };
 
   useEffect(() => {
-    const controller = new AbortController();
     async function fetchData() {
       try {
         const response = await api.get("/get-skills", {
           withCredentials: true,
-          signal: controller.signal,    
         });
         setSkills(response.data.skillsInfo);
       } catch (error) {
@@ -55,7 +54,7 @@ const UpdateUser = (id) => {
       }
     }
     fetchData();
-  }, [id, navigate  ]);
+  }, [id, navigate]);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -79,7 +78,7 @@ const UpdateUser = (id) => {
         initialUserRef.current = initialUserData;
         console.log("userData:fetchUserData", initialUserRef.current);
       } catch (error) {
-        console.error("Error:", error); 
+        console.error("Error:", error);
       }
     }
     fetchUserData();
@@ -99,7 +98,7 @@ const UpdateUser = (id) => {
       if (error.response.status === 409) {
         toast.error("Please Login first!", { autoClose: 3000 });
         navigate("/Login");
-      } else if(error.response.status ===403){
+      } else if (error.response.status === 403) {
         toast.error("Permission denied", { autoClose: 3000 });
       }
     }
@@ -110,7 +109,7 @@ const UpdateUser = (id) => {
       <h2 className="text-3xl font-semibold text-gray-800 dark:text-white text-center mb-6">
         Update User
       </h2>
-      <form onSubmit={onSubmitHandler} className="space-y-4">
+      <form onSubmit={onSubmitHandler} autoComplete="off" className="space-y-4">
         <div>
           <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
             First Name:
@@ -118,6 +117,9 @@ const UpdateUser = (id) => {
           <input
             name="firstName"
             type="text"
+            minLength="3"
+            maxLength="40"
+            autoFocus={true}
             placeholder="Enter First Name"
             value={user.firstName}
             required

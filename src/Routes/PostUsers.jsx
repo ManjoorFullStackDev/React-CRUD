@@ -20,7 +20,7 @@ const PostUser = () => {
   useEffect(() => {
     setUser((prevUser) => ({ ...prevUser, location: locationData }));
   }, [locationData]);
-
+console.log('locationData',locationData);
   useEffect(() => {
     async function fetchData() {
       try {
@@ -71,12 +71,15 @@ const PostUser = () => {
         <h2 className="text-2xl font-semibold text-[#6b705c] text-center mb-5">
           Add New User
         </h2>
-        <form onSubmit={onSubmitHandler} className="space-y-4">
+        <form onSubmit={onSubmitHandler} className="space-y-4" autoComplete="off">
           <div>
-            <label className="block text-[#6b705c] font-medium mb-1">First Name:</label>
+            <label className="block text-[#6b705c] font-medium mb-1" >First Name:</label>
             <input
               name="firstName"
               type="text"
+              minLength="3"
+              maxLength="40"
+              autoFocus={true}
               placeholder="Enter First Name"
               value={user.firstName}
               required
