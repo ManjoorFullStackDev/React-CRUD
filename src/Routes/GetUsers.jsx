@@ -17,8 +17,10 @@ const GetUsers = () => {
         setUsers(response.data.userInfo);
       } catch (error) {
         console.error("Error:", error);
-        if(error.response.status === 409)
+        if (error.response?.status === 409) {
+          toast.error("Please Login first!", { autoClose: 2000 });
           navigate("/Login");
+        }
       }
     };
     fetchData();
@@ -36,96 +38,66 @@ const GetUsers = () => {
       });
       setUsers(updatedUserd.data.userInfo);
     } catch (error) {
-      console.error("Error:", error); 
+      console.error("Error:", error);
       if(error.response.status === 409)
         navigate("/Login")
       else if(error.response.status ===403)
        toast.error("Permission denied", { autoClose: 3000 });
     }
-    
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 rounded-xl bg-white/10 dark:bg-gray-900/30 backdrop-blur-xl shadow-2xl border border-white/30 flex flex-col h-[80vh]">
-      <div className="flex items-center mb-5 relative ">
-        <button
-          className="bg-gradient-to-r dark:text-white px-3 py-3 rounded-full text-xs shadow-md border border-black/30"
-          onClick={() => navigate(`/PostUser`)}
-        >
-          Create New User
-        </button>
+      <div className="max-w-6xl mx-auto p-6 rounded-xl bg-white/10 dark:bg-gray-900/30 backdrop-blur-xl shadow-2xl border border-white/30">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">User List</h2>
+          <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
+              onClick={() => navigate(`/PostUser`)}
+          >
+            Create New User
+          </button>
+        </div>
 
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white absolute left-1/2 transform -translate-x-1/2">
-          User List
-        </h2>
-      </div>
-
-      <div className="flex-1 overflow-y-auto rounded-lg relative max-h-[calc(100%-4rem)]">
-        <table className="w-full border-collapse backdrop-blur-xl bg-white/10 dark:bg-gray-800/10 shadow-lg rounded-2xl overflow-hidden">
-          <thead className="bg-white/20 dark:bg-gray-900/20 sticky top-0 z-20">
-            <tr className="text-gray-800 dark:text-gray-200">
-              <th className="py-3 px-4 text-left font-medium">Name</th>
-              <th className="py-3 px-4 text-left font-medium">Gender</th>
-              <th className="py-3 px-4 text-left font-medium">Birth Date</th>
-              <th className="py-3 px-4 text-left font-medium">Location</th>
-              <th className="py-3 px-4 text-left font-medium">Skills</th>
-              <th className="py-3 px-4 text-left font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr
-                key={user.id}
-                className={`${
-                  index % 2 === 0
-                    ? "bg-white/10 dark:bg-gray-800/10"
-                    : "bg-white/5 dark:bg-gray-700/5"
-                } transition-all hover:scale-[1.01] hover:shadow-lg`}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {users.map((user) => (
+              <div
+                  key={user.userId}
+                  className="bg-white/20 dark:bg-gray-800/10 p-4 rounded-xl shadow-lg flex flex-col items-center"
               >
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.firstName}
-                </td>
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.gender}
-                </td>
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.birthDate.split("T")[0]}
-                </td>
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.location}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex flex-wrap gap-2">
-                    {user.skills.map((skill, index) => (
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{user.firstName}</h3>
+                <p className="text-sm text-gray-700 dark:text-gray-300">Gender: {user.gender}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">Birth Date: {user.birthDate.split("T")[0]}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">Location: {user.location}</p>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {user.skills.map((skill, index) => (
                       <span
-                        key={index}
-                        className="bg-gradient-to-r from-blue-400 to-purple-500 text-white px-3 py-1 rounded-full text-xs shadow-md"
+                          key={index}
+                          className="bg-gradient-to-r from-blue-400 to-purple-500 text-white px-3 py-1 rounded-full text-xs shadow-md"
                       >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="py-3 px-4 flex space-x-2">
+                  {skill}
+                </span>
+                  ))}
+                </div>
+
+                <div className="flex gap-2 mt-4">
                   <button
-                    onClick={() => navigate(`/UpdateUser/${user.userId}`)}
-                    className="bg-green-500/80 hover:bg-green-600 text-white font-semibold py-1.5 px-3 rounded-md shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 inline-flex items-center gap-2"
+                      onClick={() => navigate(`/UpdateUser/${user.userId}`)}
+                      className="flex items-center gap-2 text-sm text-white bg-blue-500 hover:bg-blue-600 px-3 py-1.5 rounded-md shadow-md transition-all"
                   >
-                    <MdEdit /> Edit
+                    <MdEdit className="text-lg"/> Edit
                   </button>
                   <button
-                    onClick={() => buttonOnclick(user.userId)}
-                    className="bg-red-500/80 hover:bg-red-600 text-white font-semibold py-1.5 px-3 rounded-md shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 inline-flex items-center gap-2"
+                      onClick={() => buttonOnclick(user.userId)}
+                      className="flex items-center gap-2 text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-md shadow-md transition-all"
                   >
-                    <MdDelete /> Delete
+                    <MdDelete className="text-lg"/> Delete
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+          ))}
+        </div>
       </div>
-    </div>
   );
 };
 
