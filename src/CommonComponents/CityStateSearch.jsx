@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import api from "../api";
 import debounce from "lodash.debounce";
+import { MdAutorenew, MdSearch } from "react-icons/md";
 
 const CityStateSearch = ({
   selectLocation,
@@ -11,12 +12,12 @@ const CityStateSearch = ({
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const initialLocationRef = useRef(null);
-  console.log('initialLocation',initialLocation)
+
   useEffect(() => {
     if (initialLocationRef.current === null && initialLocation)
       initialLocationRef.current = initialLocation;
     setSearchTerm(initialLocation || "");
-  }, [initialLocation]);  
+  }, [initialLocation]);
   const fetchLocations = async (query) => {
     if (!query) {
       setSuggestions([]);
@@ -29,7 +30,6 @@ const CityStateSearch = ({
         withCredentials: true,
       });
       const cityStateList = response.data.LocationData || [];
-      console.log("response", cityStateList);
       setSuggestions(cityStateList);
     } catch (error) {
       console.error("Error:", error);
@@ -39,52 +39,39 @@ const CityStateSearch = ({
     }
   };
 
-  const debounceLocations = useCallback(debounce(fetchLocations, 2000), [
-    fetchLocations,
-  ]);
+  const debounceLocations = useCallback(debounce(fetchLocations, 3000), []);
 
   const onHandleChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
     debounceLocations(value);
-    console.log("suggestions", suggestions);
   };
 
   const onSelect = (location) => {
     setSearchTerm(location);
-    console.log("location", location);
     setSuggestions([]);
     selectLocation(location);
     setIsFormChanged(initialLocationRef.current !== location);
-    console.log("location", location);
-    console.log("isFormChanged", !(initialLocationRef.current !== location));
   };
   return (
-    <div>
-      <input
-        id="City State"
-        name="CityState"
-        type="text"
-        className="w-full max-w-sm border rounded-lg p-2 bg-white"
-        placeholder="Search for city or state"
-        value={searchTerm}
-        onChange={onHandleChange}
-      />
-      {loading && <p className="text-gray-500 text-sm">Loading...</p>}
+    <div className="relative">
+      <div className="flex items-center border rounded-lg p-2 bg-white w-full max-w-sm">
+        <MdSearch className="text-gray-500 mr-2 text-lg" />
+        <input
+          id="City State"
+          name="CityState"
+          type="text"
+          className="w-full focus:outline-none"
+          placeholder="Search for city or state"
+          value={searchTerm}
+          onChange={onHandleChange}
+        />
+        {loading && (
+          <MdAutorenew className="animate-spin text-gray-500 text-lg" />
+        )}
+      </div>
       {suggestions.length > 0 && (
-        <ul
-          style={{
-            maxHeight: "200px", 
-            overflowY: "auto",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            padding: "5px",
-            background: "white",
-            position: "absolute",
-            width: "400px",
-            zIndex: 10,
-          }}
-        >
+        <ul className="absolute mt-1 bg-white border rounded-lg shadow-md w-full max-w-sm max-h-48 overflow-y-auto z-10">
           {suggestions.map((item, index) => (
             <li
               key={index}

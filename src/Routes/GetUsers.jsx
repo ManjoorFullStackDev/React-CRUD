@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import api from "../api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { MdEdit, MdDelete } from "react-icons/md";
+import { MdEdit, MdDelete, MdMoreVert } from "react-icons/md";
 
 const GetUsers = () => {
   const [users, setUsers] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -17,113 +17,116 @@ const GetUsers = () => {
         setUsers(response.data.userInfo);
       } catch (error) {
         console.error("Error:", error);
-        if(error.response.status === 409)
+        if (error.response?.status === 409) {
+          toast.error("Please Login first!", { autoClose: 2000 });
           navigate("/Login");
+        }
       }
     };
     fetchData();
   }, []);
 
-  const buttonOnclick = async (id) => {
+  useEffect(() => {
+
+    const handleMenuOpen = (event) => {
+      if(!event.target.closest(".menu-container")) {
+        setMenuOpen(null);
+      }
+    }
+    document.addEventListener("click", handleMenuOpen)
+    return () => document.removeEventListener("click", handleMenuOpen);
+  }, [])
+
+  const deleteUser = async (id) => {
     try {
       const response = await api.delete(`/delete-user/${id}`, {
         withCredentials: true,
       });
       if (response.status === 200)
         toast.success("User deleted successfully!", { autoClose: 3000 });
-      const updatedUserd = await api.get("/get-all-users",{
+      const updatedUsers = await api.get("/get-all-users", {
         withCredentials: true,
       });
-      setUsers(updatedUserd.data.userInfo);
+      setUsers(updatedUsers.data.userInfo);
     } catch (error) {
-      console.error("Error:", error); 
-      if(error.response.status === 409)
-        navigate("/Login")
-      else if(error.response.status ===403)
-       toast.error("Permission denied", { autoClose: 3000 });
+      console.error("Error:", error);
+      if (error.response?.status === 409) navigate("/Login");
+      else if (error.response?.status === 403)
+        toast.error("Permission denied", { autoClose: 3000 });
     }
-    
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 rounded-xl bg-white/10 dark:bg-gray-900/30 backdrop-blur-xl shadow-2xl border border-white/30 flex flex-col h-[80vh]">
-      <div className="flex items-center mb-5 relative ">
+    <div className="max-w-7xl mx-auto p-6 rounded-xl bg-white/10 dark:bg-gray-900/30 backdrop-blur-xl shadow-3xl border border-white/30">
+      <div className="relative flex items-center justify-center mb-10 ">
+        <h2 className="py-3 px-3 bg-gradient-to-r bg-clip-text text-transparent from-orange-500 to-red-700 text-4xl font-extrabold ">
+          User List
+        </h2>
         <button
-          className="bg-gradient-to-r dark:text-white px-3 py-3 rounded-full text-xs shadow-md border border-black/30"
+          className="px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 absolute left-0 bg-gradient-to-r bg-clip-text text-transparent from-pink-300 to-violet-600 text-1xl font-extrabold"
           onClick={() => navigate(`/PostUser`)}
         >
           Create New User
         </button>
-
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white absolute left-1/2 transform -translate-x-1/2">
-          User List
-        </h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto rounded-lg relative max-h-[calc(100%-4rem)]">
-        <table className="w-full border-collapse backdrop-blur-xl bg-white/10 dark:bg-gray-800/10 shadow-lg rounded-2xl overflow-hidden">
-          <thead className="bg-white/20 dark:bg-gray-900/20 sticky top-0 z-20">
-            <tr className="text-gray-800 dark:text-gray-200">
-              <th className="py-3 px-4 text-left font-medium">Name</th>
-              <th className="py-3 px-4 text-left font-medium">Gender</th>
-              <th className="py-3 px-4 text-left font-medium">Birth Date</th>
-              <th className="py-3 px-4 text-left font-medium">Location</th>
-              <th className="py-3 px-4 text-left font-medium">Skills</th>
-              <th className="py-3 px-4 text-left font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr
-                key={user.id}
-                className={`${
-                  index % 2 === 0
-                    ? "bg-white/10 dark:bg-gray-800/10"
-                    : "bg-white/5 dark:bg-gray-700/5"
-                } transition-all hover:scale-[1.01] hover:shadow-lg`}
-              >
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.firstName}
-                </td>
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.gender}
-                </td>
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.birthDate.split("T")[0]}
-                </td>
-                <td className="py-3 px-4 text-gray-900 dark:text-gray-200">
-                  {user.location}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex flex-wrap gap-2">
-                    {user.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="bg-gradient-to-r from-blue-400 to-purple-500 text-white px-3 py-1 rounded-full text-xs shadow-md"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="py-3 px-4 flex space-x-2">
-                  <button
-                    onClick={() => navigate(`/UpdateUser/${user.userId}`)}
-                    className="bg-green-500/80 hover:bg-green-600 text-white font-semibold py-1.5 px-3 rounded-md shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 inline-flex items-center gap-2"
-                  >
-                    <MdEdit /> Edit
-                  </button>
-                  <button
-                    onClick={() => buttonOnclick(user.userId)}
-                    className="bg-red-500/80 hover:bg-red-600 text-white font-semibold py-1.5 px-3 rounded-md shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 inline-flex items-center gap-2"
-                  >
-                    <MdDelete /> Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-7 overflow-y-auto">
+        {users.map((user) => (
+          <div
+            key={user.userId}
+            className="bg-white/30 dark:bg-gray-800/10 p-4 rounded-xl shadow-lg flex flex-col items-center relative"
+          >
+            <button
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 menu-container"
+              onClick={() =>
+                setMenuOpen(menuOpen === user.userId ? null : user.userId)
+              }
+            >
+              <MdMoreVert size={24} />
+            </button>
+
+            {menuOpen === user.userId && (
+              <div className="absolute top-10 right-2 bg-white dark:bg-gray-700 shadow-lg rounded-lg p-2">
+                <button
+                  className="flex items-center gap-2 text-sm text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1 rounded-md w-full"
+                  onClick={() => navigate(`/UpdateUser/${user.userId}`)}
+                >
+                  <MdEdit className="text-lg" /> Edit
+                </button>
+                <button
+                  className="flex items-center gap-2 text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-600 px-3 py-1 rounded-md w-full"
+                  onClick={() => deleteUser(user.userId)}
+                >
+                  <MdDelete className="text-lg" /> Delete
+                </button>
+              </div>
+            )}
+
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {user.firstName}
+            </h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Gender: {user.gender}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Birth Date: {user.birthDate.split("T")[0]}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Location: {user.location}
+            </p>
+
+            <div className="flex flex-wrap gap-2 mt-2">
+              {user.skills.map((skill, index) => (
+                <span
+                  key={index}
+                  className="bg-gradient-to-r from-sky-500 to-purple-400 text-white px-3 py-1 rounded-full text-xs shadow-md"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
