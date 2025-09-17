@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Select from "react-select";
+
+//Common Component for Multi Select Dropdown
 const MultiSelectDropdown = ({
   options,
   selectedOptions = [],
