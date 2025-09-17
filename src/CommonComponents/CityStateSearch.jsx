@@ -3,6 +3,7 @@ import api from "../api";
 import debounce from "lodash.debounce";
 import { MdAutorenew, MdSearch } from "react-icons/md";
 
+//Common Component for City State Search with Autocomplete
 const CityStateSearch = ({
   selectLocation,
   initialLocation,
